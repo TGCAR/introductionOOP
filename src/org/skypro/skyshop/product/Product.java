@@ -2,11 +2,11 @@ package org.skypro.skyshop.product;
 
 public class Product {
     private String nameProduct;
-    private String valueProduct;
+    private int valueProduct;
 
 
 
-    public Product(String nameProduct, String valueProduct) {
+    public Product(String nameProduct, int valueProduct) {
         this.nameProduct = nameProduct;
         this.valueProduct = valueProduct;
     }
@@ -15,7 +15,7 @@ public class Product {
         return nameProduct;
     }
 
-    public String getValueProduct() {
+    public int getValueProduct() {
         return valueProduct;
     }
 }
