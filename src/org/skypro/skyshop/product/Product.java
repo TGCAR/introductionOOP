@@ -1,21 +1,28 @@
 package org.skypro.skyshop.product;
 
 public class Product {
-    private String nameProduct;
-    private int valueProduct;
+    private final String name;
+    private final int price;
 
-
-
-    public Product(String nameProduct, int valueProduct) {
-        this.nameProduct = nameProduct;
-        this.valueProduct = valueProduct;
+    // Конструктор для инициализации полей
+    public Product(String name, int price) {
+        this.name = name;
+        this.price = price;
     }
 
-    public String getNameProduct() {
-        return nameProduct;
+    // Геттер для получения названия продукта
+    public String getName() {
+        return name;
     }
 
-    public int getValueProduct() {
-        return valueProduct;
+    // Геттер для получения стоимости продукта
+    public int getPrice() {
+        return price;
+    }
+
+    // Пример использования
+    public static void main(String[] args) {
+        Product apple = new Product("Яблоко", 100);
+        System.out.println("Продукт: " + apple.getName() + ", Стоимость: " + apple.getPrice());
     }
 }
