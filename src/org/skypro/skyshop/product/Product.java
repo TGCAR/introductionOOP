@@ -3,6 +3,7 @@ package org.skypro.skyshop.product;
 public class Product {
     private final String name;
     private final int price;
+//    private final int price;
 
     // Конструктор для инициализации полей
     public Product(String name, int price) {
@@ -22,7 +23,7 @@ public class Product {
 
     // Пример использования
     public static void main(String[] args) {
-        Product apple = new Product("Яблоко", 100);
+        Product apple = new SimpleProduct("Яблоко", 100);
         System.out.println("Продукт: " + apple.getName() + ", Стоимость: " + apple.getPrice());
     }
 }
