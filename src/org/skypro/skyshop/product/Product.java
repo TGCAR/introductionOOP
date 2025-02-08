@@ -1,13 +1,11 @@
 package org.skypro.skyshop.product;
 
-public class Product {
+public abstract class Product {
     private final String name;
-    private final int price;
 
     // Конструктор для инициализации полей
-    public Product(String name, int price) {
+    public Product(String name) {
         this.name = name;
-        this.price = price;
     }
 
     // Геттер для получения названия продукта
@@ -16,13 +14,8 @@ public class Product {
     }
 
     // Геттер для получения стоимости продукта
-    public int getPrice() {
-        return price;
-    }
+    public abstract int getPrice();
 
-    // Пример использования
-    public static void main(String[] args) {
-        Product apple = new Product("Яблоко", 100);
-        System.out.println("Продукт: " + apple.getName() + ", Стоимость: " + apple.getPrice());
-    }
+    // Метод для проверки, является ли товар специальным
+    public abstract boolean isSpecial();
 }
