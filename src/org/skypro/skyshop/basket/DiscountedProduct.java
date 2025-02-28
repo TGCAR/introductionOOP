@@ -16,7 +16,7 @@ public class DiscountedProduct extends Product {
     // Переопределенный метод getPrice с учетом скидки
     @Override
     public int getPrice() {
-        return basePrice - (basePrice * discount / 100);
+        return (int) (basePrice * (100 - discount) / 100.0);
     }
 
     @Override

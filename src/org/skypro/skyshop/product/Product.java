@@ -1,6 +1,8 @@
 package org.skypro.skyshop.product;
 
-public abstract class Product {
+import org.skypro.skyshop.search.Searchable;
+
+public abstract class Product implements Searchable {
     private final String name;
 
     // Конструктор для инициализации полей
@@ -11,6 +13,16 @@ public abstract class Product {
     // Геттер для получения названия продукта
     public String getName() {
         return name;
+    }
+
+    @Override
+    public String getSearchTerm() {
+        return name;
+    }
+
+    @Override
+    public String getContentType() {
+        return "PRODUCT";
     }
 
     // Геттер для получения стоимости продукта
