@@ -2,6 +2,8 @@ package org.skypro.skyshop.basket;
 
 import org.skypro.skyshop.product.Product;
 
+import java.util.Arrays;
+
 public class ProductBasket {
     private final Product[] products;
     private int productCount;
@@ -42,5 +44,9 @@ public class ProductBasket {
         }
         System.out.println("Итого: " + getTotalPrice());
         System.out.println("Специальных товаров: " + getSpecialCount());
+    }
+
+    public Product [] getProducts() {
+        return Arrays.copyOf(products, productCount);
     }
 }

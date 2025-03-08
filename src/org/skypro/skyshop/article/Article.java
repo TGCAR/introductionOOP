@@ -13,7 +13,7 @@ public class Article implements Searchable {
 
     @Override
     public String getSearchTerm() {
-        return toString();
+        return title + " " + text;
     }
 
     @Override
@@ -22,12 +22,7 @@ public class Article implements Searchable {
     }
 
     @Override
-    public String getName() {
-        return title;
-    }
-
-    @Override
-    public String toString() {
+    public String toString () {
         return title + "\n" + text;
-    }
+        }
 }

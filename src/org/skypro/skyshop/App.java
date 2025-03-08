@@ -6,7 +6,9 @@ import org.skypro.skyshop.basket.ProductBasket;
 import org.skypro.skyshop.product.FixPriceProduct;
 import org.skypro.skyshop.product.SimpleProduct;
 import org.skypro.skyshop.search.SearchEngine;
-import org.skypro.skyshop.search.Searchable;
+
+import java.util.Arrays;
+import java.util.Objects;
 
 
 public class App {
@@ -21,45 +23,40 @@ public class App {
         basket.addProduct(new DiscountedProduct("Хлеб", 60, 10));
         basket.addProduct(new FixPriceProduct("Сахар"));
 
-        // Печать содержимого корзины с несколькими товарами
+        // Выводим содержимое корзины
+        System.out.println("=".repeat(40));
         basket.printBasketContents();
-
-        // Создаем статьи
-        Article article1 = new Article("Как выбрать телевизор", "Советы по выбору телевизора...");
-        Article article2 = new Article("Польза молока", "Молоко полезно для здоровья...");
 
         // Создаем поисковый движок
         SearchEngine searchEngine = new SearchEngine(10);
 
-        // Добавляем товары и статьи в поисковый движок
-        searchEngine.add(new SimpleProduct("Молоко", 120));
-        searchEngine.add(new DiscountedProduct("Телевизор", 50000, 15));
-        searchEngine.add(new FixPriceProduct("Соль"));
-        searchEngine.add(new DiscountedProduct("Хлеб", 60, 10));
-        searchEngine.add(new FixPriceProduct("Сахар"));
-        searchEngine.add(article1);
-        searchEngine.add(article2);
+        // Добавляем товары в поисковый движок
+        Arrays.stream(basket.getProducts())
+                .forEach(searchEngine::add);
+
+        // Добавляем статьи
+        searchEngine.add(new Article("Выбор телевизора", "Советы по выбору LED телевизора"));
+        searchEngine.add(new Article("Польза молока", "Молоко содержит кальций и витамины"));
+
 
         // Демонстрируем поиск
-        System.out.println("\nРезультаты поиска по запросу 'телевизор':");
-        Searchable[] results = searchEngine.search("телевизор");
-        printSearchResults(results);
+        System.out.println("\n" + "=".repeat(40));
+        printSearchResults(searchEngine, "телевизор");
 
-        System.out.println("\nРезультаты поиска по запросу 'молоко':");
-        results = searchEngine.search("молоко");
-        printSearchResults(results);
+        System.out.println("\n" + "=".repeat(40));
+        printSearchResults(searchEngine, "молоко");
 
-        System.out.println("\nРезультаты поиска по запросу 'сахар':");
-        results = searchEngine.search("сахар");
-        printSearchResults(results);
-
+        System.out.println("\n" + "=".repeat(40));
+        printSearchResults(searchEngine, "сахар");
     }
 
-    private static void printSearchResults(Searchable[] results) {
-        for (Searchable result : results) {
-            if (result != null) {
-                System.out.println("> " + result.getStringRepresentation());
-            }
-        }
+    private static void printSearchResults(SearchEngine engine, String query) {
+        System.out.println("Результаты поиска по запросу '" + query + "':");
+        Arrays.stream(engine.search(query))
+                .filter(Objects::nonNull)
+                .forEach(item ->
+                        System.out.println("• " + item.getStringRepresentation())
+                );
+
     }
 }
