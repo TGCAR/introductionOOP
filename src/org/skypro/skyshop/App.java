@@ -1,63 +1,93 @@
 package org.skypro.skyshop;
 
+import org.skypro.skyshop.article.Article;
+import org.skypro.skyshop.basket.DiscountedProduct;
 import org.skypro.skyshop.basket.ProductBasket;
-import org.skypro.skyshop.product.Product;
+import org.skypro.skyshop.exception.BestResultNotFound;
+import org.skypro.skyshop.product.FixPriceProduct;
+import org.skypro.skyshop.product.SimpleProduct;
+import org.skypro.skyshop.search.SearchEngine;
+import org.skypro.skyshop.search.Searchable;
+
+import java.util.Arrays;
+import java.util.Objects;
+
 
 public class App {
     public static void main(String[] args) {
+        // Создаем движок поиска ДО использования
+        SearchEngine engine = new SearchEngine(10); // <-- Объявление здесь
+        // Демонстрация проверок
+        try {
+            new SimpleProduct("  ", 100);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Ошибка: " + e.getMessage());
+        }
+
+        try {
+            new DiscountedProduct("Телевизор", -100, 10);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Ошибка: " + e.getMessage());
+        }
+
         // Создание корзины
         ProductBasket basket = new ProductBasket();
 
-        // Создание продуктов
-        Product apple = new Product("Яблоко", 100);
-        Product banana = new Product("Банан", 150);
-        Product orange = new Product("Апельсин", 200);
-        Product pineapple = new Product("Ананас", 300);
-        Product grape = new Product("Виноград", 250);
-        Product melon = new Product("Дыня", 400);
+        // Добавляем разные типы товаров
+        basket.addProduct(new SimpleProduct("Молоко", 120));
+        basket.addProduct(new DiscountedProduct("Телевизор", 50000, 15));
+        basket.addProduct(new FixPriceProduct("Соль"));
+        basket.addProduct(new DiscountedProduct("Хлеб", 60, 10));
+        basket.addProduct(new FixPriceProduct("Сахар"));
 
-        // 1. Добавление продукта в корзину
-        System.out.println("Добавление продуктов в корзину:");
-        basket.addProduct(apple);
-        basket.addProduct(banana);
-        basket.addProduct(orange);
+        // Выводим содержимое корзины
+        System.out.println("=".repeat(40));
         basket.printBasketContents();
 
-        // 2. Добавление продукта в заполненную корзину, в которой нет свободного места
-        System.out.println("\nПопытка добавить больше продуктов, чем возможно:");
-        basket.addProduct(pineapple);
-        basket.addProduct(grape);
-        basket.addProduct(melon); // Это должно вывести сообщение о том, что корзина заполнена
-        basket.printBasketContents();
+        // Создаем поисковый движок
+        SearchEngine searchEngine = new SearchEngine(10);
 
-        // 3. Печать содержимого корзины с несколькими товарами
-        System.out.println("\nСодержимое корзины:");
-        basket.printBasketContents();
+        // Добавляем товары в поисковый движок
+        Arrays.stream(basket.getProducts())
+                .forEach(searchEngine::add);
 
-        // 4. Получение стоимости корзины с несколькими товарами
-        System.out.println("Стоимость корзины: " + basket.getTotalPrice());
+        // Добавляем статьи
+        searchEngine.add(new Article("Выбор телевизора", "Советы по выбору LED телевизора"));
+        searchEngine.add(new Article("Польза молока", "Молоко содержит кальций и витамины"));
 
-        // 5. Поиск товара, который есть в корзине
-        System.out.println("\nПоиск товара в корзине:");
-        System.out.println("Продукт Банан в корзине: " + basket.hasProduct("Банан"));
 
-        // 6. Поиск товара, которого нет в корзине
-        System.out.println("Продукт Дыня в корзине: " + basket.hasProduct("Дыня"));
+        // Демонстрируем поиск
+        System.out.println("\n" + "=".repeat(40));
+        printSearchResults(searchEngine, "телевизор");
 
-        // 7. Очистка корзины
-        System.out.println("\nОчистка корзины:");
-        basket.clearBasket();
-        basket.printBasketContents();
+        System.out.println("\n" + "=".repeat(40));
+        printSearchResults(searchEngine, "молоко");
 
-        // 8. Печать содержимого пустой корзины
-        System.out.println("\nСодержимое пустой корзины:");
-        basket.printBasketContents();
+        System.out.println("\n" + "=".repeat(40));
+        printSearchResults(searchEngine, "сахар");
 
-        // 9. Получение стоимости пустой корзины
-        System.out.println("Стоимость пустой корзины: " + basket.getTotalPrice());
+        try {
+            Searchable bestMatch = engine.findBestMatch("телевизор");
+            System.out.println("\nЛучший результат: " + bestMatch.getStringRepresentation());
+        } catch (BestResultNotFound e) {
+            System.out.println(e.getMessage());
+        }
 
-        // 10. Поиск товара по имени в пустой корзине
-        System.out.println("\nПоиск товара в пустой корзине:");
-        System.out.println("Продукт Банан в корзине: " + basket.hasProduct("Банан"));
+        // Поиск несуществующего элемента
+        try {
+            engine.findBestMatch("смартфон");
+        } catch (BestResultNotFound e) {
+            System.out.println("\n[Ошибка поиска] " + e.getMessage());
+        }
+    }
+
+    private static void printSearchResults(SearchEngine engine, String query) {
+        System.out.println("Результаты поиска по запросу '" + query + "':");
+        Arrays.stream(engine.search(query))
+                .filter(Objects::nonNull)
+                .forEach(item ->
+                        System.out.println("• " + item.getStringRepresentation())
+                );
+
     }
 }
