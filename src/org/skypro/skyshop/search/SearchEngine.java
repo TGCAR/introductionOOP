@@ -1,5 +1,9 @@
 package org.skypro.skyshop.search;
 
+import org.skypro.skyshop.exception.BestResultNotFound;
+
+import static java.awt.SystemColor.text;
+
 public class SearchEngine {
     private final Searchable[] searchables;
     private int index;
@@ -29,5 +33,35 @@ public class SearchEngine {
         }
 
         return results;
+    }
+
+    public Searchable findBestMatch(String query) throws BestResultNotFound {
+        Searchable bestMatch = null;
+        int maxCount = 0;
+
+        for (Searchable item : searchables) {
+            if (item == null) continue;
+
+            int count = countOccurrences(item.getSearchTerm(), query);
+            if (count > maxCount) {
+                maxCount = count;
+                bestMatch = item;
+            }
+        }
+
+        if (bestMatch == null) {
+            throw new BestResultNotFound(query);
+        }
+        return bestMatch;
+    }
+
+    private int countOccurrences(String text, String query) {
+        int count = 0;
+        int index = 0;
+        while ((index = text.indexOf(query, index)) != -1) {
+            count++;
+            index += query.length();
+        }
+        return count;
     }
 }
