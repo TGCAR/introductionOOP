@@ -2,51 +2,36 @@ package org.skypro.skyshop.basket;
 
 import org.skypro.skyshop.product.Product;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public class ProductBasket {
-    private final Product[] products;
-    private int productCount;
-
-    public ProductBasket() {
-        this.products = new Product[10];
-        this.productCount = 0;
-    }
+    private final List<Product> products = new ArrayList<>();
 
     public void addProduct(Product product) {
-        if (productCount < products.length) {
-            products[productCount++] = product;
-        }
+        products.add(product);
     }
 
-    public int getTotalPrice() {
-        int total = 0;
-        for (int i = 0; i < productCount; i++) {
-            total += products[i].getPrice();
-        }
-        return total;
-    }
-
-    public int getSpecialCount() {
-        int count = 0;
-        for (int i = 0; i < productCount; i++) {
-            if (products[i].isSpecial()) {
-                count++;
+    public List<Product> removeProductsByName(String name) {
+        List<Product> removed = new ArrayList<>();
+        Iterator<Product> iterator = products.iterator();
+        while (iterator.hasNext()) {
+            Product p = iterator.next();
+            if (p.getName().equals(name)) {
+                removed.add(p);
+                iterator.remove();
             }
         }
-        return count;
+        return removed;
     }
 
-    public void printBasketContents() {
+    public void printBasket() {
         System.out.println("Содержимое корзины:");
-        for (int i = 0; i < productCount; i++) {
-            System.out.println(products[i]);
-        }
-        System.out.println("Итого: " + getTotalPrice());
-        System.out.println("Специальных товаров: " + getSpecialCount());
+        products.forEach(System.out::println);
     }
 
-    public Product [] getProducts() {
-        return Arrays.copyOf(products, productCount);
+    public List<Product> getProducts() {
+        return new ArrayList<>(products);
     }
 }

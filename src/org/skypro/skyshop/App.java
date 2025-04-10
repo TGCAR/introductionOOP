@@ -5,19 +5,22 @@ import org.skypro.skyshop.basket.DiscountedProduct;
 import org.skypro.skyshop.basket.ProductBasket;
 import org.skypro.skyshop.exception.BestResultNotFound;
 import org.skypro.skyshop.product.FixPriceProduct;
+import org.skypro.skyshop.product.Product;
 import org.skypro.skyshop.product.SimpleProduct;
 import org.skypro.skyshop.search.SearchEngine;
 import org.skypro.skyshop.search.Searchable;
 
-import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 
 public class App {
     public static void main(String[] args) {
         // Создаем движок поиска ДО использования
-        SearchEngine engine = new SearchEngine(10); // <-- Объявление здесь
-        // Демонстрация проверок
+        new SearchEngine();
+        SearchEngine engine; // <-- Объявление здесь
+
+
         try {
             new SimpleProduct("  ", 100);
         } catch (IllegalArgumentException e) {
@@ -40,15 +43,27 @@ public class App {
         basket.addProduct(new DiscountedProduct("Хлеб", 60, 10));
         basket.addProduct(new FixPriceProduct("Сахар"));
 
+        // Удаление по имени
+        List<Product> removed = basket.removeProductsByName("Молоко");
+        System.out.println("Удаленные товары: " + removed);
+        basket.printBasket();
+
+        // Поиск
+        engine = new SearchEngine();
+        engine.add(new SimpleProduct("Ноутбук", 50000));
+        List<Searchable> results = engine.search("ноут");
+        System.out.println("Результаты поиска: " + results);
+
         // Выводим содержимое корзины
         System.out.println("=".repeat(40));
-        basket.printBasketContents();
+        basket.printBasket();
 
         // Создаем поисковый движок
-        SearchEngine searchEngine = new SearchEngine(10);
+        SearchEngine searchEngine = new SearchEngine();
 
         // Добавляем товары в поисковый движок
-        Arrays.stream(basket.getProducts())
+        basket.getProducts().stream()  // Используем stream() самого списка
+                .filter(Objects::nonNull)
                 .forEach(searchEngine::add);
 
         // Добавляем статьи
@@ -83,7 +98,7 @@ public class App {
 
     private static void printSearchResults(SearchEngine engine, String query) {
         System.out.println("Результаты поиска по запросу '" + query + "':");
-        Arrays.stream(engine.search(query))
+        engine.search(query).stream() // Используем stream() у самого списка
                 .filter(Objects::nonNull)
                 .forEach(item ->
                         System.out.println("• " + item.getStringRepresentation())

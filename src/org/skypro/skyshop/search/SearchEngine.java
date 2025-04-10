@@ -1,37 +1,23 @@
 package org.skypro.skyshop.search;
 
 import org.skypro.skyshop.exception.BestResultNotFound;
-
-import static java.awt.SystemColor.text;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SearchEngine {
-    private final Searchable[] searchables;
-    private int index;
+    private final List<Searchable> items = new ArrayList<>();
 
-    public SearchEngine(int capacity) {
-        this.searchables = new Searchable[capacity];
-        this.index = 0;
+    public void add(Searchable item) {
+        items.add(item);
     }
 
-    public void add(Searchable searchable) {
-        if (index < searchables.length) {
-            searchables[index++] = searchable;
-        }
-    }
-
-    public Searchable[] search(String query) {
-        Searchable[] results = new Searchable[5];
-        int count = 0;
-
-        for (Searchable searchable : searchables) {
-            if (searchable != null && searchable.getSearchTerm().toLowerCase().contains(query.toLowerCase())) {
-                results[count++] = searchable;
-                if (count == 5) {
-                    break;
-                }
+    public List<Searchable> search(String query) {
+        List<Searchable> results = new ArrayList<>();
+        for (Searchable item : items) {
+            if (item.getSearchTerm().toLowerCase().contains(query.toLowerCase())) {
+                results.add(item);
             }
         }
-
         return results;
     }
 
@@ -39,7 +25,7 @@ public class SearchEngine {
         Searchable bestMatch = null;
         int maxCount = 0;
 
-        for (Searchable item : searchables) {
+        for (Searchable item : items) {
             if (item == null) continue;
 
             int count = countOccurrences(item.getSearchTerm(), query);
