@@ -1,13 +1,16 @@
 package org.skypro.skyshop.product;
 
-public class Product {
+import org.skypro.skyshop.search.Searchable;
+
+public abstract class Product implements Searchable {
     private final String name;
-    private final int price;
 
     // Конструктор для инициализации полей
-    public Product(String name, int price) {
+    public Product(String name) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("Название продукта не может быть пустым");
+        }
         this.name = name;
-        this.price = price;
     }
 
     // Геттер для получения названия продукта
@@ -15,14 +18,19 @@ public class Product {
         return name;
     }
 
-    // Геттер для получения стоимости продукта
-    public int getPrice() {
-        return price;
+    @Override
+    public String getSearchTerm() {
+        return name;
     }
 
-    // Пример использования
-    public static void main(String[] args) {
-        Product apple = new Product("Яблоко", 100);
-        System.out.println("Продукт: " + apple.getName() + ", Стоимость: " + apple.getPrice());
+    @Override
+    public String getContentType() {
+        return "PRODUCT";
     }
+
+    // Геттер для получения стоимости продукта
+    public abstract int getPrice();
+
+    // Метод для проверки, является ли товар специальным
+    public abstract boolean isSpecial();
 }
