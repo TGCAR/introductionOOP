@@ -4,23 +4,17 @@ import org.skypro.skyshop.article.Article;
 import org.skypro.skyshop.basket.DiscountedProduct;
 import org.skypro.skyshop.basket.ProductBasket;
 import org.skypro.skyshop.exception.BestResultNotFound;
-import org.skypro.skyshop.product.FixPriceProduct;
-import org.skypro.skyshop.product.Product;
-import org.skypro.skyshop.product.SimpleProduct;
+import org.skypro.skyshop.product.*;
 import org.skypro.skyshop.search.SearchEngine;
 import org.skypro.skyshop.search.Searchable;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
-
 
 public class App {
     public static void main(String[] args) {
-        // Создаем движок поиска ДО использования
-        new SearchEngine();
-        SearchEngine engine; // <-- Объявление здесь
-
-
+        // Проверка валидации товаров
         try {
             new SimpleProduct("  ", 100);
         } catch (IllegalArgumentException e) {
@@ -28,50 +22,35 @@ public class App {
         }
 
         try {
-            new DiscountedProduct("Телевизор", -100, 10);
+            DiscountedProduct телевизор = new DiscountedProduct("Телевизор", -100, 10);
         } catch (IllegalArgumentException e) {
             System.out.println("Ошибка: " + e.getMessage());
         }
 
-        // Создание корзины
+        // Создание корзины и добавление товаров
         ProductBasket basket = new ProductBasket();
-
-        // Добавляем разные типы товаров
         basket.addProduct(new SimpleProduct("Молоко", 120));
         basket.addProduct(new DiscountedProduct("Телевизор", 50000, 15));
         basket.addProduct(new FixPriceProduct("Соль"));
         basket.addProduct(new DiscountedProduct("Хлеб", 60, 10));
         basket.addProduct(new FixPriceProduct("Сахар"));
 
-        // Удаление по имени
+        // Удаление товаров по имени
         List<Product> removed = basket.removeProductsByName("Молоко");
         System.out.println("Удаленные товары: " + removed);
         basket.printBasket();
 
-        // Поиск
-        engine = new SearchEngine();
-        engine.add(new SimpleProduct("Ноутбук", 50000));
-        List<Searchable> results = engine.search("ноут");
-        System.out.println("Результаты поиска: " + results);
-
-        // Выводим содержимое корзины
-        System.out.println("=".repeat(40));
-        basket.printBasket();
-
-        // Создаем поисковый движок
+        // Создание и настройка поискового движка
         SearchEngine searchEngine = new SearchEngine();
-
-        // Добавляем товары в поисковый движок
-        basket.getProducts().stream()  // Используем stream() самого списка
+        basket.getProducts().stream()
                 .filter(Objects::nonNull)
                 .forEach(searchEngine::add);
 
-        // Добавляем статьи
+        // Добавление статей в поисковый движок
         searchEngine.add(new Article("Выбор телевизора", "Советы по выбору LED телевизора"));
         searchEngine.add(new Article("Польза молока", "Молоко содержит кальций и витамины"));
 
-
-        // Демонстрируем поиск
+        // Демонстрация поиска
         System.out.println("\n" + "=".repeat(40));
         printSearchResults(searchEngine, "телевизор");
 
@@ -81,16 +60,17 @@ public class App {
         System.out.println("\n" + "=".repeat(40));
         printSearchResults(searchEngine, "сахар");
 
+        // Поиск лучшего совпадения
         try {
-            Searchable bestMatch = engine.findBestMatch("телевизор");
+            Searchable bestMatch = searchEngine.findBestMatch("телевизор");
             System.out.println("\nЛучший результат: " + bestMatch.getStringRepresentation());
         } catch (BestResultNotFound e) {
             System.out.println(e.getMessage());
         }
 
-        // Поиск несуществующего элемента
+        // Обработка исключения при отсутствии результатов
         try {
-            engine.findBestMatch("смартфон");
+            searchEngine.findBestMatch("смартфон");
         } catch (BestResultNotFound e) {
             System.out.println("\n[Ошибка поиска] " + e.getMessage());
         }
@@ -98,11 +78,9 @@ public class App {
 
     private static void printSearchResults(SearchEngine engine, String query) {
         System.out.println("Результаты поиска по запросу '" + query + "':");
-        engine.search(query).stream() // Используем stream() у самого списка
-                .filter(Objects::nonNull)
-                .forEach(item ->
-                        System.out.println("• " + item.getStringRepresentation())
-                );
-
+        Map<String, Searchable> results = engine.search(query);
+        results.forEach((name, item) ->
+                System.out.println("• " + item.getStringRepresentation())
+        );
     }
 }

@@ -1,34 +1,39 @@
 package org.skypro.skyshop.search;
 
 import org.skypro.skyshop.exception.BestResultNotFound;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class SearchEngine {
-    private final List<Searchable> items = new ArrayList<>();
+    private final Map<String, Searchable> itemsMap = new TreeMap<>();
 
+    // Добавление элемента в поисковый индекс
     public void add(Searchable item) {
-        items.add(item);
+        itemsMap.put(item.getSearchTerm().toLowerCase(), item);
     }
 
-    public List<Searchable> search(String query) {
-        List<Searchable> results = new ArrayList<>();
-        for (Searchable item : items) {
-            if (item.getSearchTerm().toLowerCase().contains(query.toLowerCase())) {
-                results.add(item);
+    // Поиск по точному совпадению (возвращает отсортированную мапу)
+    public Map<String, Searchable> search(String query) {
+        Map<String, Searchable> results = new TreeMap<>();
+        String lowerQuery = query.toLowerCase();
+
+        itemsMap.forEach((key, item) -> {
+            if (key.contains(lowerQuery)) {
+                results.put(item.getSearchTerm(), item);
             }
-        }
+        });
         return results;
     }
 
+    // Поиск лучшего совпадения по количеству вхождений
     public Searchable findBestMatch(String query) throws BestResultNotFound {
         Searchable bestMatch = null;
         int maxCount = 0;
+        String lowerQuery = query.toLowerCase();
 
-        for (Searchable item : items) {
-            if (item == null) continue;
+        for (Searchable item : itemsMap.values()) {
+            int count = countOccurrences(item.getSearchTerm().toLowerCase(), lowerQuery);
 
-            int count = countOccurrences(item.getSearchTerm(), query);
             if (count > maxCount) {
                 maxCount = count;
                 bestMatch = item;
@@ -41,6 +46,7 @@ public class SearchEngine {
         return bestMatch;
     }
 
+    // Подсчет количества вхождений подстроки
     private int countOccurrences(String text, String query) {
         int count = 0;
         int index = 0;
