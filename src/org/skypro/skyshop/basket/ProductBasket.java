@@ -1,77 +1,58 @@
 package org.skypro.skyshop.basket;
+
 import org.skypro.skyshop.product.Product;
 
-public class ProductBasket {
-    private final Product[] products;
-    private int productCount;
+import java.util.*;
 
-    public ProductBasket() {
-        this.products = new Product[5];
-        this.productCount = 0;
+public class ProductBasket {
+    private final Map<String, List<Product>> productsMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+
+    // Метод подсчета общей стоимости через Stream API
+    public int getTotalPrice() {
+        return productsMap.values().stream()
+                .flatMap(List::stream)
+                .mapToInt(Product::getPrice)
+                .sum();
     }
 
     public void addProduct(Product product) {
-        if (productCount >= products.length) {
-            System.out.println("Невозможно добавить продукт");
-            return;
-        }
-        products[productCount++] = product;
+        String nameKey = product.getName().toLowerCase(); // Нормализация ключа
+        productsMap.computeIfAbsent(nameKey, k -> new ArrayList<>()).add(product);
     }
 
-    public int getTotalPrice() {
-        int total = 0;
-        for (int i = 0; i < productCount; i++) {
-            total += products[i].getPrice();
-        }
-        return total;
+    public List<Product> removeProductsByName(String name) {
+        String nameKey = name.toLowerCase(); // Нормализация ключа
+        List<Product> removed = productsMap.getOrDefault(nameKey, new ArrayList<>());
+        productsMap.remove(nameKey);
+        return new ArrayList<>(removed);
     }
 
+    // Метод вывода содержимого корзины через Stream API
     public void printBasketContents() {
-        if (productCount == 0) {
-            System.out.println("В корзине пусто");
-        } else {
-            for (int i = 0; i < productCount; i++) {
-                System.out.println(products[i].getName() + ": " + products[i].getPrice());
-            }
-            System.out.println("Итого: " + getTotalPrice());
-        }
+        System.out.println("Содержимое корзины:");
+        productsMap.values().stream()
+                .flatMap(List::stream)
+                .forEach(System.out::println);
+
+        System.out.println("Итого: " + getTotalPrice());
+        System.out.println("Специальных товаров: " + getSpecialCount());
     }
 
-    public boolean hasProduct(String productName) {
-        for (int i = 0; i < productCount; i++) {
-            if (products[i].getName().equals(productName)) {
-                return true;
-            }
-        }
-        return false;
+    // Подсчет специальных товаров через Stream API
+    private long getSpecialCount() {
+        return productsMap.values().stream()
+                .flatMap(List::stream)
+                .filter(Product::isSpecial)
+                .count();
     }
 
-    public void clearBasket() {
-        for (int i = 0; i < productCount; i++) {
-            products[i] = null;
-        }
-        productCount = 0;
+    public List<Product> getProducts() {
+        return productsMap.values().stream()
+                .flatMap(List::stream)
+                .toList();
     }
 
-    public static void main(String[] args) {
-        ProductBasket basket1 = new ProductBasket();
-        ProductBasket basket2 = new ProductBasket();
+    public void printBasket() {
 
-        Product apple = new Product("Яблоко", 100);
-        Product banana = new Product("Банан", 150);
-        Product orange = new Product("Апельсин", 200);
-
-        basket1.addProduct(apple);
-        basket1.addProduct(banana);
-        basket1.printBasketContents();
-
-        basket2.addProduct(orange);
-        basket2.printBasketContents();
-
-        System.out.println("Продукт Банан в корзине basket1: " + basket1.hasProduct("Банан"));
-        System.out.println("Продукт Банан в корзине basket2: " + basket2.hasProduct("Банан"));
-
-        basket1.clearBasket();
-        basket1.printBasketContents();
     }
 }

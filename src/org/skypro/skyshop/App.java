@@ -1,63 +1,106 @@
 package org.skypro.skyshop;
 
+import org.skypro.skyshop.article.Article;
+import org.skypro.skyshop.basket.DiscountedProduct;
 import org.skypro.skyshop.basket.ProductBasket;
-import org.skypro.skyshop.product.Product;
+import org.skypro.skyshop.exception.BestResultNotFound;
+import org.skypro.skyshop.product.*;
+import org.skypro.skyshop.search.SearchEngine;
+import org.skypro.skyshop.search.Searchable;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 public class App {
     public static void main(String[] args) {
-        // Создание корзины
+        // Проверка валидации товаров
+        validateProducts();
+
+        // Создание и настройка корзины
+        ProductBasket basket = createBasketWithProducts();
+        removeProductsDemo(basket);
+
+        // Настройка поискового движка
+        SearchEngine searchEngine = configureSearchEngine(basket);
+
+        // Демонстрация поиска
+        demonstrateSearch(searchEngine);
+
+        // Поиск лучших совпадений
+        demonstrateBestMatch(searchEngine);
+    }
+
+    private static void validateProducts() {
+        try {
+            new SimpleProduct("  ", 100);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Ошибка валидации: " + e.getMessage());
+        }
+
+        try {
+            new DiscountedProduct("Телевизор", -100, 10);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Ошибка валидации: " + e.getMessage());
+        }
+    }
+
+    private static ProductBasket createBasketWithProducts() {
         ProductBasket basket = new ProductBasket();
+        basket.addProduct(new SimpleProduct("Молоко", 120));
+        basket.addProduct(new DiscountedProduct("Телевизор", 50000, 15));
+        basket.addProduct(new FixPriceProduct("Соль"));
+        basket.addProduct(new DiscountedProduct("Хлеб", 60, 10));
+        basket.addProduct(new FixPriceProduct("Сахар"));
+        return basket;
+    }
 
-        // Создание продуктов
-        Product apple = new Product("Яблоко", 100);
-        Product banana = new Product("Банан", 150);
-        Product orange = new Product("Апельсин", 200);
-        Product pineapple = new Product("Ананас", 300);
-        Product grape = new Product("Виноград", 250);
-        Product melon = new Product("Дыня", 400);
+    private static void removeProductsDemo(ProductBasket basket) {
+        List<Product> removed = basket.removeProductsByName("Молоко");
+        System.out.println("\nУдаленные товары: " + removed);
+        basket.printBasket();
+    }
 
-        // 1. Добавление продукта в корзину
-        System.out.println("Добавление продуктов в корзину:");
-        basket.addProduct(apple);
-        basket.addProduct(banana);
-        basket.addProduct(orange);
-        basket.printBasketContents();
+    private static SearchEngine configureSearchEngine(ProductBasket basket) {
+        SearchEngine searchEngine = new SearchEngine();
 
-        // 2. Добавление продукта в заполненную корзину, в которой нет свободного места
-        System.out.println("\nПопытка добавить больше продуктов, чем возможно:");
-        basket.addProduct(pineapple);
-        basket.addProduct(grape);
-        basket.addProduct(melon); // Это должно вывести сообщение о том, что корзина заполнена
-        basket.printBasketContents();
+        basket.getProducts().stream()
+                .filter(Objects::nonNull)
+                .forEach(searchEngine::add);
 
-        // 3. Печать содержимого корзины с несколькими товарами
-        System.out.println("\nСодержимое корзины:");
-        basket.printBasketContents();
+        searchEngine.add(new Article("Выбор телевизора", "Советы по выбору LED телевизора"));
+        searchEngine.add(new Article("Польза молока", "Молоко содержит кальций и витамины"));
 
-        // 4. Получение стоимости корзины с несколькими товарами
-        System.out.println("Стоимость корзины: " + basket.getTotalPrice());
+        return searchEngine;
+    }
 
-        // 5. Поиск товара, который есть в корзине
-        System.out.println("\nПоиск товара в корзине:");
-        System.out.println("Продукт Банан в корзине: " + basket.hasProduct("Банан"));
+    private static void demonstrateSearch(SearchEngine searchEngine) {
+        printSearchResults(searchEngine, "телевизор");
+        printSearchResults(searchEngine, "молоко");
+        printSearchResults(searchEngine, "сахар");
+    }
 
-        // 6. Поиск товара, которого нет в корзине
-        System.out.println("Продукт Дыня в корзине: " + basket.hasProduct("Дыня"));
+    private static void demonstrateBestMatch(SearchEngine searchEngine) {
+        try {
+            Searchable bestMatch = searchEngine.findBestMatch("телевизор");
+            System.out.println("\nЛучший результат: " + bestMatch.getStringRepresentation());
+        } catch (BestResultNotFound e) {
+            System.out.println(e.getMessage());
+        }
 
-        // 7. Очистка корзины
-        System.out.println("\nОчистка корзины:");
-        basket.clearBasket();
-        basket.printBasketContents();
+        try {
+            searchEngine.findBestMatch("смартфон");
+        } catch (BestResultNotFound e) {
+            System.out.println("\nОшибка поиска: " + e.getMessage());
+        }
+    }
 
-        // 8. Печать содержимого пустой корзины
-        System.out.println("\nСодержимое пустой корзины:");
-        basket.printBasketContents();
+    private static void printSearchResults(SearchEngine engine, String query) {
+        System.out.println("\n" + "=".repeat(40));
+        System.out.println("Результаты поиска по запросу '" + query + "':");
 
-        // 9. Получение стоимости пустой корзины
-        System.out.println("Стоимость пустой корзины: " + basket.getTotalPrice());
-
-        // 10. Поиск товара по имени в пустой корзине
-        System.out.println("\nПоиск товара в пустой корзине:");
-        System.out.println("Продукт Банан в корзине: " + basket.hasProduct("Банан"));
+        engine.search(query).stream()
+                .map(item -> "• " + item.getStringRepresentation())
+                .forEach(System.out::println);
     }
 }
