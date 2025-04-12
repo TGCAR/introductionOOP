@@ -9,8 +9,8 @@ import org.skypro.skyshop.search.SearchEngine;
 import org.skypro.skyshop.search.Searchable;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 public class App {
     public static void main(String[] args) {
@@ -78,8 +78,8 @@ public class App {
 
     private static void printSearchResults(SearchEngine engine, String query) {
         System.out.println("Результаты поиска по запросу '" + query + "':");
-        Map<String, Searchable> results = engine.search(query);
-        results.forEach((name, item) ->
+        Set<Searchable> results = engine.search(query);
+        results.forEach(item ->
                 System.out.println("• " + item.getStringRepresentation())
         );
     }

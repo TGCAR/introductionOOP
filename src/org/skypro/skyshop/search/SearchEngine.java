@@ -1,27 +1,27 @@
 package org.skypro.skyshop.search;
 
 import org.skypro.skyshop.exception.BestResultNotFound;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.Set;
+import java.util.TreeSet;
 
 public class SearchEngine {
-    private final Map<String, Searchable> itemsMap = new TreeMap<>();
+    private final Set<Searchable> items = new TreeSet<>(new SearchableComparator());
 
     // Добавление элемента в поисковый индекс
     public void add(Searchable item) {
-        itemsMap.put(item.getSearchTerm().toLowerCase(), item);
+        items.add(item); // Заменяем put() на add() для Set
     }
 
-    // Поиск по точному совпадению (возвращает отсортированную мапу)
-    public Map<String, Searchable> search(String query) {
-        Map<String, Searchable> results = new TreeMap<>();
+    // Поиск по подстроке (возвращает отсортированный Set)
+    public Set<Searchable> search(String query) {
+        Set<Searchable> results = new TreeSet<>(new SearchableComparator());
         String lowerQuery = query.toLowerCase();
 
-        itemsMap.forEach((key, item) -> {
-            if (key.contains(lowerQuery)) {
-                results.put(item.getSearchTerm(), item);
+        for (Searchable item : items) {
+            if (item.getSearchTerm().toLowerCase().contains(lowerQuery)) {
+                results.add(item); // Заменяем put() на add() для Set
             }
-        });
+        }
         return results;
     }
 
@@ -31,7 +31,7 @@ public class SearchEngine {
         int maxCount = 0;
         String lowerQuery = query.toLowerCase();
 
-        for (Searchable item : itemsMap.values()) {
+        for (Searchable item : items) { // Итерация по Set напрямую
             int count = countOccurrences(item.getSearchTerm().toLowerCase(), lowerQuery);
 
             if (count > maxCount) {
