@@ -3,6 +3,7 @@ package org.skypro.skyshop.search;
 import org.skypro.skyshop.exception.BestResultNotFound;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 public class SearchEngine {
     private final Set<Searchable> items = new TreeSet<>(new SearchableComparator());
@@ -14,15 +15,12 @@ public class SearchEngine {
 
     // Поиск по подстроке (возвращает отсортированный Set)
     public Set<Searchable> search(String query) {
-        Set<Searchable> results = new TreeSet<>(new SearchableComparator());
-        String lowerQuery = query.toLowerCase();
-
-        for (Searchable item : items) {
-            if (item.getSearchTerm().toLowerCase().contains(lowerQuery)) {
-                results.add(item); // Заменяем put() на add() для Set
-            }
-        }
-        return results;
+        final String lowerQuery = query.toLowerCase();
+        return items.stream()
+                .filter(item -> item.getSearchTerm().toLowerCase().contains(lowerQuery))
+                .collect(Collectors.toCollection(() ->
+                        new TreeSet<>(new SearchableComparator())
+                ));
     }
 
     // Поиск лучшего совпадения по количеству вхождений

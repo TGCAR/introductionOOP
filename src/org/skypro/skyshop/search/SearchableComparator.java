@@ -9,6 +9,7 @@ public class SearchableComparator implements Comparator<Searchable> {
                 o2.getSearchTerm().length(),
                 o1.getSearchTerm().length()
         );
-        return (lengthCompare != 0) ? lengthCompare : o1.getSearchTerm().compareTo(o2.getSearchTerm());
+        return lengthCompare != 0 ? lengthCompare :
+                o1.getSearchTerm().compareTo(o2.getSearchTerm());
     }
 }

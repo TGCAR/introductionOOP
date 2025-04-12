@@ -5,25 +5,45 @@ import org.skypro.skyshop.product.Product;
 import java.util.*;
 
 public class ProductBasket {
-    private final List<Product> products = new ArrayList<>();
+    private final Map<String, List<Product>> productsMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
-    private final Map<String, List<Product>> productsMap = new TreeMap<>();
+    // Метод подсчета общей стоимости через Stream API
+    public int getTotalPrice() {
+        return productsMap.values().stream()
+                .flatMap(List::stream)
+                .mapToInt(Product::getPrice)
+                .sum();
+    }
 
     public void addProduct(Product product) {
-        productsMap.computeIfAbsent(product.getName(), k -> new ArrayList<>()).add(product);
+        String nameKey = product.getName().toLowerCase(); // Нормализация ключа
+        productsMap.computeIfAbsent(nameKey, k -> new ArrayList<>()).add(product);
     }
 
     public List<Product> removeProductsByName(String name) {
-        return productsMap.remove(name.toLowerCase()) != null ?
-                new ArrayList<>(productsMap.remove(name)) :
-                Collections.emptyList();
+        String nameKey = name.toLowerCase(); // Нормализация ключа
+        List<Product> removed = productsMap.getOrDefault(nameKey, new ArrayList<>());
+        productsMap.remove(nameKey);
+        return new ArrayList<>(removed);
     }
 
+    // Метод вывода содержимого корзины через Stream API
     public void printBasketContents() {
         System.out.println("Содержимое корзины:");
-        productsMap.forEach((name, products) ->
-                products.forEach(System.out::println)
-        );
+        productsMap.values().stream()
+                .flatMap(List::stream)
+                .forEach(System.out::println);
+
+        System.out.println("Итого: " + getTotalPrice());
+        System.out.println("Специальных товаров: " + getSpecialCount());
+    }
+
+    // Подсчет специальных товаров через Stream API
+    private long getSpecialCount() {
+        return productsMap.values().stream()
+                .flatMap(List::stream)
+                .filter(Product::isSpecial)
+                .count();
     }
 
     public List<Product> getProducts() {
