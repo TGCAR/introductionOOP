@@ -5,34 +5,32 @@ import org.skypro.skyshop.product.Product;
 import java.util.*;
 
 public class ProductBasket {
-    private final List<Product> products = new ArrayList<>();
+    private final Map<String, Integer> productsMap = new HashMap<>();
 
-    private final Map<String, List<Product>> productsMap = new TreeMap<>();
 
     public void addProduct(Product product) {
-        productsMap.computeIfAbsent(product.getName(), k -> new ArrayList<>()).add(product);
+        String productName = product.getName().toLowerCase();
+        productsMap.put(productName, productsMap.getOrDefault(productName, 0) + 1);
     }
 
-    public List<Product> removeProductsByName(String name) {
-        return productsMap.remove(name.toLowerCase()) != null ?
-                new ArrayList<>(productsMap.remove(name)) :
-                Collections.emptyList();
+    public int removeProductsByName(String name) {
+        String key = name.toLowerCase();
+        Integer removedCount = productsMap.remove(key);
+        return removedCount != null ? removedCount : 0;
     }
 
     public void printBasketContents() {
         System.out.println("Содержимое корзины:");
-        productsMap.forEach((name, products) ->
-                products.forEach(System.out::println)
+        productsMap.forEach((name, count) ->
+                System.out.println(name + " x" + count)
         );
     }
 
-    public List<Product> getProducts() {
-        return productsMap.values().stream()
-                .flatMap(List::stream)
-                .toList();
+    public Map<String, Integer> getProducts() {
+        return new HashMap<>(productsMap);
     }
 
     public void printBasket() {
-
+        printBasketContents();
     }
 }

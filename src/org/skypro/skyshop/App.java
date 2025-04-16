@@ -7,8 +7,6 @@ import org.skypro.skyshop.exception.BestResultNotFound;
 import org.skypro.skyshop.product.*;
 import org.skypro.skyshop.search.SearchEngine;
 import org.skypro.skyshop.search.Searchable;
-
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -36,15 +34,13 @@ public class App {
         basket.addProduct(new FixPriceProduct("Сахар"));
 
         // Удаление товаров по имени
-        List<Product> removed = basket.removeProductsByName("Молоко");
+        int removed = basket.removeProductsByName("Молоко");
         System.out.println("Удаленные товары: " + removed);
         basket.printBasket();
 
         // Создание и настройка поискового движка
         SearchEngine searchEngine = new SearchEngine();
-        basket.getProducts().stream()
-                .filter(Objects::nonNull)
-                .forEach(searchEngine::add);
+
 
         // Добавление статей в поисковый движок
         searchEngine.add(new Article("Выбор телевизора", "Советы по выбору LED телевизора"));
