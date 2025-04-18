@@ -9,7 +9,7 @@ public class SearchEngine {
 
     // Добавление элемента в поисковый индекс
     public void add(Searchable item) {
-        itemsMap.put(item.getSearchTerm().toLowerCase(), item);
+        itemsMap.put(item.getSearchTerm(), item);
     }
 
     // Поиск по точному совпадению (возвращает отсортированную мапу)
@@ -17,11 +17,12 @@ public class SearchEngine {
         Map<String, Searchable> results = new TreeMap<>();
         String lowerQuery = query.toLowerCase();
 
-        itemsMap.forEach((key, item) -> {
-            if (key.contains(lowerQuery)) {
-                results.put(item.getSearchTerm(), item);
+        for (Map.Entry<String, Searchable> entry : itemsMap.entrySet()) {
+            String key = entry.getKey();
+            if (key.toLowerCase().contains(lowerQuery)) {
+                results.put(key, entry.getValue());
             }
-        });
+        }
         return results;
     }
 
@@ -31,12 +32,13 @@ public class SearchEngine {
         int maxCount = 0;
         String lowerQuery = query.toLowerCase();
 
-        for (Searchable item : itemsMap.values()) {
-            int count = countOccurrences(item.getSearchTerm().toLowerCase(), lowerQuery);
+        for (Map.Entry<String, Searchable> entry : itemsMap.entrySet()) {
+            String key = entry.getKey().toLowerCase();
+            int count = countOccurrences(key, lowerQuery);
 
             if (count > maxCount) {
                 maxCount = count;
-                bestMatch = item;
+                bestMatch = entry.getValue();
             }
         }
 
@@ -47,7 +49,7 @@ public class SearchEngine {
     }
 
     // Подсчет количества вхождений подстроки
-    private int countOccurrences(String text, String query) {
+    private int countOccurrences(String text, String query)  {
         int count = 0;
         int index = 0;
         while ((index = text.indexOf(query, index)) != -1) {
